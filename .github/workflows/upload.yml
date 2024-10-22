@@ -1,0 +1,43 @@
+name: Zip and Upload iOS Folder
+
+on:
+  push:
+    branches:
+      - main  # Run this action when pushing to the main branch
+  workflow_dispatch:  # Allows manual trigger of the workflow
+
+jobs:
+  zip_and_upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Zip the iOS folder
+    - name: Zip iOS folder
+      run: |
+        zip -r ios.zip ios/
+    
+    # 3. Upload zip as an artifact (if you want to use GitHub Actions artifacts)
+    - name: Upload zipped iOS folder as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-archive
+        path: ios.zip
+
+    # 4. Upload the zip file to GitHub Releases (change to upload elsewhere if needed)
+    - name: Upload zip to GitHub release
+      id: upload-release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ios.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use GitHub's default token
+
+    # Optional: Upload to a custom server (replace with your server details)
+    # Uncomment and modify this section if you want to upload to a different server
+    # - name: Upload zip to custom server
+    #   run: |
+    #     curl -X POST -F "file=@ios.zip" http://your-server-url/upload-endpoint
